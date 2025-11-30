@@ -9,12 +9,17 @@ class ConanConfiguration(ConanFile):
     settings = "arch", "os", "compiler", "build_type"
     options = {"shared": [True, False]}
     default_options = {"shared": True}
-    generators = "CMakeDeps"
+    #generators = "CMakeDeps"
 
     def requirements(self):
         try:
             self.requires("gtest/1.11.0")
             self.requires("exqudens-cpp-log/0.0.1")
+            self.requires("nlohmann_json/3.12.0")
+            #self.requires("vulkan-headers/1.4.313.0")
+            self.requires("vulkan-sdk/1.4.328.1")
+            self.requires("glfw/3.4.0")
+            self.requires("glm/1.0.1")
         except Exception as e:
             self.output.error(e)
             raise e
@@ -61,6 +66,3 @@ class ConanConfiguration(ConanFile):
         except Exception as e:
             self.output.error(e)
             raise e
-
-if __name__ == "__main__":
-    pass

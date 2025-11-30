@@ -1,0 +1,33 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration
+        default="false"
+        name="VulkanTutorial1GuiTests.test1"
+        type="CMakeGoogleTestRunConfigurationType"
+        factoryName="Google Test"
+        REDIRECT_INPUT="false"
+        ELEVATE="false"
+        USE_EXTERNAL_CONSOLE="false"
+        EMULATE_TERMINAL="false"
+        WORKING_DIR="file://$ProjectFileDir$"
+        PASS_PARENT_ENVS_2="true"
+        PROJECT_NAME="exqudens-cpp-vulkan-example"
+        TARGET_NAME="test-app"
+        CONFIG_NAME="windows.ninja.msvc-x64-x64.debug.shared"
+        RUN_TARGET_PROJECT_NAME="exqudens-cpp-vulkan-example"
+        RUN_TARGET_NAME="test-app"
+        TEST_CLASS="VulkanTutorial1GuiTests"
+        TEST_METHOD="test1"
+        TEST_MODE="SUITE_TEST"
+    >
+        <method v="2">
+            <option
+                name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask"
+                enabled="true"
+            />
+            <option
+                name="BeforeTestRunTask"
+                enabled="true"
+            />
+        </method>
+  </configuration>
+</component>

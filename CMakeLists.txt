@@ -93,29 +93,29 @@ set(CMAKE_STATIC_LIBRARY_PREFIX "")
 set(CMAKE_IMPORT_LIBRARY_PREFIX "")
 set(CMAKE_STAGING_PREFIX "")
 set(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
-set(CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH FALSE)
-set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)
-set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH TRUE)
-set(CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY FALSE)
-set(CMAKE_FIND_USE_PACKAGE_REGISTRY FALSE)
-set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH FALSE)
-set(CMAKE_FIND_USE_CMAKE_PATH TRUE)
-set(CMAKE_FIND_PACKAGE_PREFER_CONFIG FALSE)
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
+set(CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH "0")
+set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH "0")
+set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH "1")
+set(CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY "0")
+set(CMAKE_FIND_USE_PACKAGE_REGISTRY "0")
+set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH "0")
+set(CMAKE_FIND_USE_CMAKE_PATH "1")
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG "1")
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "0")
 set(CMAKE_BUILD_RPATH "\$ORIGIN")
 set(CMAKE_INSTALL_RPATH "\$ORIGIN")
-set(CMAKE_SKIP_BUILD_RPATH TRUE)
-set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+set(CMAKE_SKIP_BUILD_RPATH "1")
+set(CMAKE_BUILD_RPATH_USE_ORIGIN "1")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH "1")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH "0")
 set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
-set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN "1")
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED TRUE)
-set(CMAKE_C_EXTENSIONS FALSE)
+set(CMAKE_C_STANDARD_REQUIRED "1")
+set(CMAKE_C_EXTENSIONS "0")
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_CXX_EXTENSIONS FALSE)
+set(CMAKE_CXX_STANDARD_REQUIRED "1")
+set(CMAKE_CXX_EXTENSIONS "0")
 
 #[[separate_arguments(CMAKE_CXX_FLAGS NATIVE_COMMAND "${CMAKE_CXX_FLAGS}")
 if(MSVC)
@@ -302,6 +302,11 @@ if("${${PROJECT_NAME}_CMAKE_FIND_PACKAGE_NAMES}" STREQUAL "")
             "GTest"
             "exqudens-cpp-log-api"
             "exqudens-cpp-log"
+            "nlohmann_json"
+            #"VulkanHeaders"
+            "vulkan-sdk"
+            "glfw3"
+            "glm"
         )
     endif()
 endif()
@@ -326,6 +331,57 @@ foreach(cmakePackageName IN LISTS "${PROJECT_NAME}_CMAKE_FIND_PACKAGE_NAMES")
         file(REMOVE "${CONAN_INSTALL_PREFIX}/test/${cmakePackageName}-config.cmake")
         list(APPEND NOT_FOUND_PACKAGE_NAMES "${cmakePackageName}")
         find_package("${cmakePackageName}" "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_VERSION}" EXACT QUIET)
+    elseif("nlohmann_json" STREQUAL "${cmakePackageName}")
+        file(REMOVE "${CONAN_INSTALL_PREFIX}/test/${cmakePackageName}Config.cmake")
+        file(REMOVE "${CONAN_INSTALL_PREFIX}/test/${cmakePackageName}-config.cmake")
+        #list(APPEND NOT_FOUND_PACKAGE_NAMES "${cmakePackageName}")
+        #find_package("${cmakePackageName}" "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_VERSION}" EXACT QUIET)
+        if(NOT EXISTS "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_PATH}")
+            message(FATAL_ERROR "Not exists: '${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_PATH}'")
+        endif()
+        add_library("nlohmann_json" INTERFACE IMPORTED)
+        set_property(TARGET "nlohmann_json" PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_PATH}/include")
+        add_library("nlohmann_json::nlohmann_json" ALIAS "nlohmann_json")
+    elseif("VulkanHeaders" STREQUAL "${cmakePackageName}")
+        file(REMOVE "${CONAN_INSTALL_PREFIX}/test/${cmakePackageName}Config.cmake")
+        file(REMOVE "${CONAN_INSTALL_PREFIX}/test/${cmakePackageName}-config.cmake")
+        #list(APPEND NOT_FOUND_PACKAGE_NAMES "${cmakePackageName}")
+        #find_package("${cmakePackageName}" "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_VERSION}" EXACT QUIET)
+        if(NOT EXISTS "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_PATH}")
+            message(FATAL_ERROR "Not exists: '${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_PATH}'")
+        endif()
+        add_library("vulkan-headers" INTERFACE IMPORTED)
+        set_property(TARGET "vulkan-headers" PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_PATH}/include")
+        add_library("vulkan-headers::vulkan-headers" ALIAS "vulkan-headers")
+    elseif("vulkan-sdk" STREQUAL "${cmakePackageName}")
+        file(REMOVE "${CONAN_INSTALL_PREFIX}/test/${cmakePackageName}Config.cmake")
+        file(REMOVE "${CONAN_INSTALL_PREFIX}/test/${cmakePackageName}-config.cmake")
+        list(APPEND NOT_FOUND_PACKAGE_NAMES "${cmakePackageName}")
+        find_package("${cmakePackageName}" "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_VERSION}" EXACT QUIET)
+        add_library("vulkan-sdk" SHARED IMPORTED)
+        set_property(TARGET "vulkan-sdk" PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_PATH}/include")
+        if("windows" IN_LIST "PRESET_NAME_ELEMENTS")
+            set_property(TARGET "vulkan-sdk" PROPERTY IMPORTED_IMPLIB "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_PATH}/lib/vulkan-1.lib")
+        else()
+            set_property(TARGET "vulkan-sdk" PROPERTY IMPORTED_LOCATION "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_PATH}/bin/vulkan.so")
+        endif()
+        add_library("vulkan-sdk::vulkan-sdk" ALIAS "vulkan-sdk")
+    elseif("glfw3" STREQUAL "${cmakePackageName}")
+        file(REMOVE "${CONAN_INSTALL_PREFIX}/test/${cmakePackageName}Config.cmake")
+        file(REMOVE "${CONAN_INSTALL_PREFIX}/test/${cmakePackageName}-config.cmake")
+        list(APPEND NOT_FOUND_PACKAGE_NAMES "${cmakePackageName}")
+        find_package("${cmakePackageName}" "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_VERSION}" EXACT QUIET)
+    elseif("glm" STREQUAL "${cmakePackageName}")
+        file(REMOVE "${CONAN_INSTALL_PREFIX}/test/${cmakePackageName}Config.cmake")
+        file(REMOVE "${CONAN_INSTALL_PREFIX}/test/${cmakePackageName}-config.cmake")
+        #list(APPEND NOT_FOUND_PACKAGE_NAMES "${cmakePackageName}")
+        #find_package("${cmakePackageName}" "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_VERSION}" EXACT QUIET)
+        if(NOT EXISTS "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_PATH}")
+            message(FATAL_ERROR "Not exists: '${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_PATH}'")
+        endif()
+        add_library("glm" INTERFACE IMPORTED)
+        set_property(TARGET "glm" PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${PROJECT_NAME}_CMAKE_PACKAGE_${cmakePackageName}_PATH}/include")
+        add_library("glm::glm" ALIAS "glm")
     else()
         message(WARNING "Ignore cmakePackageName: '${cmakePackageName}'")
     endif()
@@ -345,6 +401,9 @@ if(NOT "${SKIP_TEST}")
         "src/test/cpp/TestApplication.hpp"
         "src/test/cpp/TestApplication.cpp"
         "src/test/cpp/unit/OtherUnitTests.hpp"
+        "src/test/cpp/gui/VulkanTutorial1GuiTests.hpp"
+        "src/test/cpp/gui/VulkanTutorial2GuiTests.hpp"
+        "src/test/cpp/gui/VulkanTutorial3GuiTests.hpp"
     )
     generate_export_header("test-lib"
         BASE_NAME "TEST_LIB"
@@ -366,6 +425,11 @@ if(NOT "${SKIP_TEST}")
         "GTest::gmock_main"
         "GTest::gtest_main"
         "exqudens-cpp-log::exqudens-cpp-log"
+        "nlohmann_json::nlohmann_json"
+        #"vulkan-headers::vulkan-headers"
+        "vulkan-sdk::vulkan-sdk"
+        "glfw"
+        "glm::glm"
     )
     set_target_properties("test-lib" PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY                "${PROJECT_BINARY_DIR}/test/bin"
@@ -474,7 +538,7 @@ add_custom_target("vscode"
             LAUNCH_TEMPLATE_FILE "${PROJECT_SOURCE_DIR}/src/test/resources/vscode/launch.json"
             LAUNCH_FILE "${PROJECT_SOURCE_DIR}/.vscode/launch.json"
             LAUNCH_TESTS_FILE "${PROJECT_BINARY_DIR}/test/bin/tests.json"
-            LAUNCH_DEFAULT_TEST "OtherUnitTests.test1"
+            LAUNCH_DEFAULT_TEST "VulkanTutorial3GuiTests.test1"
     DEPENDS "test-app"
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
     USES_TERMINAL
@@ -486,6 +550,8 @@ message(STATUS "all-targets:")
 foreach(t IN LISTS ALL_TARGETS)
     message(STATUS "${t}")
 endforeach()
+
+message(STATUS "CMAKE_TOOLCHAIN_FILE: '${CMAKE_TOOLCHAIN_FILE}'")
 
 #[[set("${PROJECT_NAME}_ADDITIONAL_CLEAN_FILES"
     "${CMAKE_INSTALL_PREFIX}"
